@@ -2,9 +2,21 @@ use std::convert::Infallible;
 use std::net::SocketAddr;
 use hyper::{Body, Request, Response, Server};
 use hyper::service::{make_service_fn, service_fn};
+use hyper::http::{StatusCode};
+mod routes;
+pub use crate::routes::{index, about};
 
 async fn hello_world(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
-    Ok(Response::new("Hello, Worlds".into()))
+    match _req.uri().path() {
+        "/" => Ok(index(_req)),
+        "/about" => Ok(about(_req)),
+        _ => Ok(Response::builder()
+                .status(StatusCode::from_u16(404).unwrap())
+                .body("Page not found".into())
+                .unwrap()
+            )
+    }
+    
 }
 
 #[tokio::main]
